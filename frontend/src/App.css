@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './styles/glassmorphism.css';
+@import './styles/forms.css';
+@import './styles/dashboard.css';
+@import './styles/auth.css';
+@import './styles/landing.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(
+    135deg,
+    #1a4d3a 0%,
+    #2d6748 25%,
+    #4a8c6a 50%,
+    #8bb89e 75%,
+    #ffffff 100%
+  );
+  min-height: 100vh;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
