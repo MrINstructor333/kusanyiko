@@ -210,6 +210,8 @@ if os.environ.get('DATABASE_URL'):
         conn_max_age=600,
         conn_health_checks=True,
     )
+    # Ensure we use the correct PostgreSQL engine for psycopg3
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 
 
 # Password validation
