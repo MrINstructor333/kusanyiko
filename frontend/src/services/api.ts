@@ -18,6 +18,12 @@ function getApiBaseURL(): string {
   }
 
   const hostname = getCurrentHostIP();
+
+  // Explicit check for Render production deployment
+  if (hostname === 'kusanyiko-frontend.onrender.com') {
+    return 'https://kusanyiko-backend-g3je.onrender.com';
+  }
+
   const isHttps = window.location.protocol === 'https:';
   const port = window.location.port;
   const isDevServer = port === '3000' || port === '5173';
@@ -25,12 +31,6 @@ function getApiBaseURL(): string {
   // For dev server, use proxy setup (relative URLs)
   if (isDevServer) {
     return '';  // Use relative URLs for proxy
-  }
-
-  // For production deployment on Render
-  if (!isDevServer && hostname.includes('onrender.com')) {
-    // For Render deployments, use the backend URL directly
-    return 'https://kusanyiko-backend-g3je.onrender.com';
   }
 
   // For other production deployments
@@ -50,9 +50,7 @@ function getApiBaseURL(): string {
 
   // If accessing via network IP, use the same IP for API
   return `${preferredProtocol}://${hostname}:8000`;
-}
-
-// Initialize API with dynamic base URL
+}// Initialize API with dynamic base URL
 const apiBaseURL = getApiBaseURL();
 console.log(`🌐 Frontend running on: ${window.location.origin}`);
 console.log(`🔗 API endpoint set to: ${apiBaseURL || 'proxy'}`);
