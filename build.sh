@@ -2,11 +2,14 @@
 # Exit on error
 set -o errexit
 
-# Modify this line as needed for your package manager (pip, poetry, etc.)
+# Install dependencies
 pip install -r requirements.txt
 
+# Navigate to Django project directory
+cd kusanyikoo
+
 # Convert static asset files
-python kusanyikoo/manage.py collectstatic --no-input
+python manage.py collectstatic --no-input
 
 # Apply any outstanding database migrations
-python kusanyikoo/manage.py migrate
+python manage.py migrate
