@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Exit on error
-set -o errexit
+set -e
 
-# Install dependencies
+echo "Installing dependencies..."
+pip install --upgrade pip
 pip install -r requirements.txt
 
-# Navigate to Django project directory
+echo "Navigating to Django project directory..."
 cd kusanyikoo
 
-# Convert static asset files
-python manage.py collectstatic --no-input
+echo "Collecting static files..."
+python manage.py collectstatic --no-input --clear
 
-# Apply any outstanding database migrations
+echo "Running database migrations..."
 python manage.py migrate
+
+echo "Build completed successfully!"

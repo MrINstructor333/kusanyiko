@@ -195,22 +195,15 @@ PASSWORD_HASHERS = [
 # Database Configuration
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# PostgreSQL Database Configuration for development
+# Default to SQLite for local development
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kusanyiko',
-        'USER': 'postgres',
-        'PASSWORD': 'kiburuta1',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'prefer',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
-# Use DATABASE_URL from environment for production (Render)
+# Use DATABASE_URL from environment for production (Render/PostgreSQL)
 if os.environ.get('DATABASE_URL'):
     DATABASES['default'] = dj_database_url.parse(
         os.environ.get('DATABASE_URL'),
