@@ -26,22 +26,28 @@ function getApiBaseURL(): string {
   if (isDevServer) {
     return '';  // Use relative URLs for proxy
   }
-  
-  // For production deployment (no dev server ports)
-  if (!isDevServer && (hostname.includes('render.com') || hostname.includes('netlify.app') || hostname.includes('vercel.app'))) {
-    // For production deployments, try to determine backend URL
+
+  // For production deployment on Render
+  if (!isDevServer && hostname.includes('onrender.com')) {
+    // For Render deployments, use the backend URL directly
+    return 'https://kusanyiko-backend-g3je.onrender.com';
+  }
+
+  // For other production deployments
+  if (!isDevServer && (hostname.includes('netlify.app') || hostname.includes('vercel.app'))) {
+    // For other production deployments, try to determine backend URL
     const backendHost = hostname.replace(/^[^.]+\./, 'api.');  // Replace subdomain with 'api'
     return `https://${backendHost}`;
   }
-  
+
   // For production or direct access, determine backend URL
   const preferredProtocol = 'http';  // Backend always uses HTTP for now
-  
+
   // If accessing via localhost or 127.0.0.1, use localhost for API
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `${preferredProtocol}://localhost:8000`;
   }
-  
+
   // If accessing via network IP, use the same IP for API
   return `${preferredProtocol}://${hostname}:8000`;
 }
