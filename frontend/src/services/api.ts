@@ -7,6 +7,11 @@ function getCurrentHostIP(): string {
 
 // Function to determine the API base URL dynamically
 function getApiBaseURL(): string {
+  // Check for environment variable first (production)
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+
   const savedURL = localStorage.getItem("REACT_APP_API_URL");
   if (savedURL) {
     return savedURL;
@@ -20,6 +25,13 @@ function getApiBaseURL(): string {
   // For dev server, use proxy setup (relative URLs)
   if (isDevServer) {
     return '';  // Use relative URLs for proxy
+  }
+  
+  // For production deployment (no dev server ports)
+  if (!isDevServer && (hostname.includes('render.com') || hostname.includes('netlify.app') || hostname.includes('vercel.app'))) {
+    // For production deployments, try to determine backend URL
+    const backendHost = hostname.replace(/^[^.]+\./, 'api.');  // Replace subdomain with 'api'
+    return `https://${backendHost}`;
   }
   
   // For production or direct access, determine backend URL

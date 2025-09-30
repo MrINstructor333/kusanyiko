@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+from decouple import config
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,12 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-cv51bg$wb6h)3sg8b^7@#12(u^#+wg3nkka)%3=7gz%fda6!)n')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-cv51bg$wb6h)3sg8b^7@#12(u^#+wg3nkka)%3=7gz%fda6!)n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.24.143.233', '10.108.254.233', '0.0.0.0']
+
+# Add Render.com domain when deploying
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Allow insecure camera access for development (not for production!)
 SECURE_BROWSER_XSS_FILTER = False
@@ -57,6 +64,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -76,8 +84,10 @@ CORS_ALLOWED_ORIGINS = [
     'https://172.24.143.233:3000',  # Current network IP HTTPS 
 ]
 
-# Allow all origins for development (you can also use this for more flexibility)
-# CORS_ALLOW_ALL_ORIGINS = True  # Uncomment this for maximum flexibility in development
+# Add frontend URL from environment for production
+FRONTEND_URL = config('FRONTEND_URL', default='https://localhost:3000')
+if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -173,10 +183,10 @@ PASSWORD_HASHERS = [
 ]
 
 
-# Database
+# Database Configuration
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# PostgreSQL Database Configuration
+# PostgreSQL Database Configuration for development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -191,10 +201,13 @@ DATABASES = {
     }
 }
 
-# Fallback to environment-based configuration if DATABASE_URL is provided
+# Use DATABASE_URL from environment for production (Render)
 if os.environ.get('DATABASE_URL'):
-    import dj_database_url
-    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    DATABASES['default'] = dj_database_url.parse(
+        os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 
 
 # Password validation
@@ -234,8 +247,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise settings for serving static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
