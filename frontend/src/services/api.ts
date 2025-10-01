@@ -258,8 +258,9 @@ export async function autoDetectEndpoint(): Promise<boolean> {
 }
 
 // Initialize auto-detection on startup (only for non-dev environments)
-if (process.env.NODE_ENV === 'production') {
-  autoDetectEndpoint().catch(console.error);
-}
+// DISABLED: Auto-detection causes issues in production with explicit API URL configuration
+// if (process.env.NODE_ENV === 'production') {
+//   autoDetectEndpoint().catch(console.error);
+// }
 
 export default api;
