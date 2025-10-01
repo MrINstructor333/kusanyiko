@@ -17,7 +17,7 @@ Start-Sleep -Seconds 3
 
 # Start React server with HTTPS
 Write-Host "🚀 Starting React frontend server with HTTPS..." -ForegroundColor Blue
-cd frontend
+Set-Location frontend
 npm start
 
 Write-Host "✅ Development servers started successfully!" -ForegroundColor Green

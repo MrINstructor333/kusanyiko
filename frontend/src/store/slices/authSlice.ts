@@ -110,6 +110,10 @@ const authSlice = createSlice({
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
+      
+      // Clear remembered credentials on logout
+      localStorage.removeItem('remembered_username');
+      localStorage.removeItem('remember_me');
     },
     clearError: (state) => {
       state.error = null;

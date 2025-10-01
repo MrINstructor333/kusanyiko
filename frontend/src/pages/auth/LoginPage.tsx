@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,17 +17,47 @@ const LoginPage: React.FC = () => {
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
+  // Load saved credentials on component mount
+  React.useEffect(() => {
+    const savedUsername = localStorage.getItem('remembered_username');
+    const savedRememberMe = localStorage.getItem('remember_me') === 'true';
+    
+    if (savedUsername && savedRememberMe) {
+      setValue('username', savedUsername);
+      setRememberMe(true);
+    }
+  }, []);
+
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<LoginCredentials>();
+
+  // Watch the remember_me checkbox
+  const watchedRememberMe = watch('remember_me', false);
+
+  React.useEffect(() => {
+    setRememberMe(!!watchedRememberMe);
+  }, [watchedRememberMe]);
 
   const onSubmit = async (data: LoginCredentials) => {
     try {
       const result = await dispatch(loginUser(data));
       if (loginUser.fulfilled.match(result)) {
         toast.success('Welcome back! Login successful.');
+        
+        // Handle remember me functionality
+        if (rememberMe && data.username) {
+          localStorage.setItem('remembered_username', data.username);
+          localStorage.setItem('remember_me', 'true');
+        } else {
+          localStorage.removeItem('remembered_username');
+          localStorage.removeItem('remember_me');
+        }
+        
         // Navigation will be handled by the AppRouter based on user role
       } else {
         toast.error(result.payload as string || 'Login failed');
@@ -142,12 +173,12 @@ const LoginPage: React.FC = () => {
         </form>
 
         <div className="auth-divider">
-          <span>Don't have an account?</span>
+          <span>Need to find someone?</span>
         </div>
 
         <div className="text-center">
-          <Link to="/signup" className="auth-link">
-            Create New Account
+          <Link to="/member-search" className="auth-link">
+            🔍 Search Members
           </Link>
         </div>
       </div>

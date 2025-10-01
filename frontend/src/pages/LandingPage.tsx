@@ -27,9 +27,6 @@ const LandingPage = () => {
             <Link to="/login" className="nav-btn nav-btn-ghost">
               Sign In
             </Link>
-            <Link to="/signup" className="nav-btn nav-btn-primary">
-              Get Started
-            </Link>
           </nav>
         </div>
       </header>
@@ -47,11 +44,6 @@ const LandingPage = () => {
             Experience spiritual renewal and transformation at Efatha Church's Annual Gathering. 
             Join believers from across regions for worship, teaching, and ministry at Precious Centre, Kibaha.
           </p>
-          <div className="hero-buttons">
-            <Link to="/signup" className="hero-btn hero-btn-primary">
-              Register for Kusanyiko
-            </Link>
-          </div>
 
           {/* Gathering Info Cards */}
           <div className="hero-stats">

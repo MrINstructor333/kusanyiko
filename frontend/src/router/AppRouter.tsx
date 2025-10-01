@@ -5,7 +5,6 @@ import { useAppSelector } from '../hooks/redux';
 // Auth Pages
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
-import SignupPage from '../pages/auth/SignupPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 
@@ -80,12 +79,6 @@ const AppRouter: React.FC = () => {
         <Route path="/login" element={
           <PublicRoute>
             <LoginPage />
-          </PublicRoute>
-        } />
-        
-        <Route path="/signup" element={
-          <PublicRoute>
-            <SignupPage />
           </PublicRoute>
         } />
         
