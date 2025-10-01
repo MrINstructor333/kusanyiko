@@ -12,7 +12,7 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.db.models import Q, Count
 import uuid
-from .serializers import SignupSerializer, LoginSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+from .serializers import SignupSerializer, LoginSerializer, UserSerializer, UserCreateSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
 from .models import User, AuditLog
 from .utils import get_client_ip, log_audit
 
@@ -271,6 +271,11 @@ class UserManagementViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return UserSerializer
     
     def get_queryset(self):
         queryset = super().get_queryset()
