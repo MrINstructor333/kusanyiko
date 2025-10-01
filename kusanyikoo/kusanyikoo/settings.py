@@ -38,7 +38,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-cv51bg$wb6h)3sg8b^7@#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.24.143.233', '10.108.254.233', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.24.143.233', '10.108.254.233', '0.0.0.0', 'kusanyiko.efathamedia.com']
 
 # Add Render.com domain when deploying
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -91,6 +91,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Vite dev server (backup) 
     'http://172.24.143.233:3000',  # Current network IP 
     'https://172.24.143.233:3000',  # Current network IP HTTPS 
+    'https://kusanyiko.efathamedia.com',  # Production subdomain
 ]
 
 # Add frontend URL from environment for production
