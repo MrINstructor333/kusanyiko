@@ -684,14 +684,14 @@ const UserManagement: React.FC = () => {
             Debug: Users loaded: {users.length}, Filtered: {filteredUsers.length}, Loading: {loading.toString()}
           </p>
           <p className="text-sm text-blue-700">
-            Screen size check - Current width: <span className="md:hidden">Mobile</span><span className="hidden md:inline lg:hidden">Tablet</span><span className="hidden lg:inline">Desktop</span>
+            Screen size check - FORCED DESKTOP VIEW (temporarily)
           </p>
         </div>
 
         {/* Users Table - Enhanced Mobile Responsive */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {/* Mobile Card View */}
-          <div className="block md:hidden">
+          <div className="hidden">
             <div className="space-y-4 p-4">
               {filteredUsers.map((user) => (
                 <div key={user.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -822,7 +822,7 @@ const UserManagement: React.FC = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
