@@ -88,7 +88,7 @@ const ExportData: React.FC = () => {
       description: `Comprehensive summary report with ${summaryStats.totalMembers} total members, gender breakdown, salvation status, and geographical distribution`,
       icon: ChartBarIcon,
       dataType: 'analytics',
-      formats: ['csv', 'excel', 'pdf'],
+      formats: ['excel', 'pdf'], // CSV not supported for analytics
       estimatedSize: '0.5 MB'
     },
     {
@@ -97,7 +97,7 @@ const ExportData: React.FC = () => {
       description: `Detailed demographics analysis including gender distribution (${summaryStats.males} males, ${summaryStats.females} females) and salvation status (${summaryStats.saved} saved, ${summaryStats.unsaved} unsaved)`,
       icon: UsersIcon,
       dataType: 'analytics',
-      formats: ['csv', 'excel', 'pdf'],
+      formats: ['excel', 'pdf'], // CSV not supported for analytics
       estimatedSize: '0.3 MB'
     },
     {
@@ -106,7 +106,7 @@ const ExportData: React.FC = () => {
       description: `Geographical distribution of members by country, regions (Tanzania), and areas (Dar es Salaam)`,
       icon: ChartBarIcon,
       dataType: 'analytics',
-      formats: ['csv', 'excel', 'pdf'],
+      formats: ['excel', 'pdf'], // CSV not supported for analytics
       estimatedSize: '0.4 MB'
     },
     {
@@ -197,7 +197,9 @@ const ExportData: React.FC = () => {
       switch (exportId) {
         case 'summary-report':
           updateProgress(40);
-          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+          // Analytics exports don't support CSV, use Excel instead
+          const analyticsFormat = selectedFormat === 'csv' ? 'excel' : selectedFormat;
+          response = await exportAPI.exportAnalytics(analyticsFormat as 'excel' | 'pdf', {
             type: 'summary',
             date_range: {
               start_date: dateRange.start,
@@ -208,7 +210,8 @@ const ExportData: React.FC = () => {
           
         case 'demographics-report':
           updateProgress(40);
-          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+          const demographicsFormat = selectedFormat === 'csv' ? 'excel' : selectedFormat;
+          response = await exportAPI.exportAnalytics(demographicsFormat as 'excel' | 'pdf', {
             type: 'demographics',
             date_range: {
               start_date: dateRange.start,
@@ -219,7 +222,8 @@ const ExportData: React.FC = () => {
           
         case 'geographical-report':
           updateProgress(40);
-          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+          const geographicalFormat = selectedFormat === 'csv' ? 'excel' : selectedFormat;
+          response = await exportAPI.exportAnalytics(geographicalFormat as 'excel' | 'pdf', {
             type: 'geographical',
             date_range: {
               start_date: dateRange.start,
