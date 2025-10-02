@@ -40,6 +40,39 @@ const ExportData: React.FC = () => {
   const [exportProgress, setExportProgress] = useState<{ [key: string]: number }>({});
   const [exportStatus, setExportStatus] = useState<{ [key: string]: 'idle' | 'exporting' | 'completed' | 'error' }>({});
 
+  // Calculate summary statistics
+  const calculateSummaryStats = () => {
+    const stats = {
+      totalMembers: members.length,
+      males: members.filter(m => m.gender === 'male').length,
+      females: members.filter(m => m.gender === 'female').length,
+      saved: members.filter(m => m.saved).length,
+      unsaved: members.filter(m => !m.saved).length,
+      countries: {} as { [key: string]: number },
+      tanzaniaRegions: {} as { [key: string]: number },
+      darEsSalaamAreas: {} as { [key: string]: number }
+    };
+
+    // Count members by country
+    members.forEach(member => {
+      stats.countries[member.country] = (stats.countries[member.country] || 0) + 1;
+    });
+
+    // Count members by region (only for Tanzania)
+    members.filter(m => m.country === 'Tanzania' && m.region).forEach(member => {
+      stats.tanzaniaRegions[member.region!] = (stats.tanzaniaRegions[member.region!] || 0) + 1;
+    });
+
+    // Count members by center/area (only for Dar es Salaam)
+    members.filter(m => m.country === 'Tanzania' && m.region === 'Dar es Salaam' && m.center_area).forEach(member => {
+      stats.darEsSalaamAreas[member.center_area!] = (stats.darEsSalaamAreas[member.center_area!] || 0) + 1;
+    });
+
+    return stats;
+  };
+
+  const summaryStats = calculateSummaryStats();
+
   // Calculate real data for export options
   const myMembersCount = members.filter(member => 
     member.created_by === user?.id || member.registered_by === user?.id
@@ -50,8 +83,35 @@ const ExportData: React.FC = () => {
 
   const exportOptions: ExportOption[] = [
     {
+      id: 'summary-report',
+      name: 'Summary Report',
+      description: `Comprehensive summary report with ${summaryStats.totalMembers} total members, gender breakdown, salvation status, and geographical distribution`,
+      icon: ChartBarIcon,
+      dataType: 'analytics',
+      formats: ['csv', 'excel', 'pdf'],
+      estimatedSize: '0.5 MB'
+    },
+    {
+      id: 'demographics-report',
+      name: 'Demographics Report',
+      description: `Detailed demographics analysis including gender distribution (${summaryStats.males} males, ${summaryStats.females} females) and salvation status (${summaryStats.saved} saved, ${summaryStats.unsaved} unsaved)`,
+      icon: UsersIcon,
+      dataType: 'analytics',
+      formats: ['csv', 'excel', 'pdf'],
+      estimatedSize: '0.3 MB'
+    },
+    {
+      id: 'geographical-report',
+      name: 'Geographical Report',
+      description: `Geographical distribution of members by country, regions (Tanzania), and areas (Dar es Salaam)`,
+      icon: ChartBarIcon,
+      dataType: 'analytics',
+      formats: ['csv', 'excel', 'pdf'],
+      estimatedSize: '0.4 MB'
+    },
+    {
       id: 'members-all',
-      name: 'All Members',
+      name: 'All Members (Detailed)',
       description: `Complete member database with ${members.length} members including personal details, contact information, and registration data`,
       icon: UsersIcon,
       dataType: 'members',
@@ -135,6 +195,39 @@ const ExportData: React.FC = () => {
 
       // Perform actual API calls based on export type
       switch (exportId) {
+        case 'summary-report':
+          updateProgress(40);
+          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+            type: 'summary',
+            date_range: {
+              start_date: dateRange.start,
+              end_date: dateRange.end
+            }
+          });
+          break;
+          
+        case 'demographics-report':
+          updateProgress(40);
+          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+            type: 'demographics',
+            date_range: {
+              start_date: dateRange.start,
+              end_date: dateRange.end
+            }
+          });
+          break;
+          
+        case 'geographical-report':
+          updateProgress(40);
+          response = await exportAPI.exportAnalytics(selectedFormat as 'csv' | 'excel' | 'pdf', {
+            type: 'geographical',
+            date_range: {
+              start_date: dateRange.start,
+              end_date: dateRange.end
+            }
+          });
+          break;
+          
         case 'members-all':
           updateProgress(40);
           response = await exportAPI.exportMembers(selectedFormat as 'csv' | 'excel' | 'pdf', {});
@@ -189,9 +282,7 @@ const ExportData: React.FC = () => {
           
         default:
           throw new Error('Unknown export type');
-      }
-
-      updateProgress(80);
+      }      updateProgress(80);
 
       // Create and download the file
       if (response && response.data) {
