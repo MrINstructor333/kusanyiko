@@ -325,20 +325,95 @@ def export_analytics_pdf(export_type, date_range):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="analytics_{export_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
     
-    # Generate analytics content
-    total_members = Member.objects.filter(is_deleted=False).count()
-    
+    # Generate analytics content based on type
     content = f"ANALYTICS REPORT - {export_type.upper()}\n"
     content += "=" * 50 + "\n\n"
     content += f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    content += f"Total Members: {total_members}\n\n"
     
-    # Add more analytics based on type
-    if export_type == 'overview':
-        gender_stats = Member.objects.filter(is_deleted=False).values('gender').annotate(count=Count('id'))
-        content += "Gender Distribution:\n"
-        for stat in gender_stats:
-            content += f"  {stat['gender']}: {stat['count']}\n"
+    if export_type in ['summary', 'overview']:
+        # Summary Report
+        total_members = Member.objects.filter(is_deleted=False).count()
+        males = Member.objects.filter(is_deleted=False, gender='male').count()
+        females = Member.objects.filter(is_deleted=False, gender='female').count()
+        saved = Member.objects.filter(is_deleted=False, saved=True).count()
+        unsaved = Member.objects.filter(is_deleted=False, saved=False).count()
+        
+        content += f"Total Members Registered: {total_members}\n"
+        content += f"Number of Males: {males}\n"
+        content += f"Number of Females: {females}\n"
+        content += f"Number of Saved Members: {saved}\n"
+        content += f"Number of Unsaved Members: {unsaved}\n\n"
+        
+        # Countries
+        country_stats = Member.objects.filter(is_deleted=False).values('country').annotate(count=Count('id')).order_by('-count')
+        content += "Members by Country:\n"
+        for stat in country_stats:
+            content += f"  {stat['country']}: {stat['count']}\n"
+        content += "\n"
+        
+        # Tanzania Regions
+        tanzania_regions = Member.objects.filter(is_deleted=False, country='Tanzania').exclude(region__isnull=True).exclude(region='').values('region').annotate(count=Count('id')).order_by('-count')
+        if tanzania_regions:
+            content += "Members by Region (Tanzania):\n"
+            for stat in tanzania_regions:
+                content += f"  {stat['region']}: {stat['count']}\n"
+            content += "\n"
+        
+        # Dar es Salaam Areas
+        dar_areas = Member.objects.filter(is_deleted=False, country='Tanzania', region='Dar es Salaam').exclude(center_area__isnull=True).exclude(center_area='').values('center_area').annotate(count=Count('id')).order_by('-count')
+        if dar_areas:
+            content += "Members by Center/Area (Dar es Salaam):\n"
+            for stat in dar_areas:
+                content += f"  {stat['center_area']}: {stat['count']}\n"
+    
+    elif export_type == 'demographics':
+        # Demographics Report
+        total_members = Member.objects.filter(is_deleted=False).count()
+        males = Member.objects.filter(is_deleted=False, gender='male').count()
+        females = Member.objects.filter(is_deleted=False, gender='female').count()
+        saved = Member.objects.filter(is_deleted=False, saved=True).count()
+        unsaved = Member.objects.filter(is_deleted=False, saved=False).count()
+        
+        content += "DEMOGRAPHICS REPORT\n"
+        content += "=" * 30 + "\n\n"
+        content += f"Total Members: {total_members}\n\n"
+        content += f"Gender Distribution:\n"
+        content += f"  Males: {males}\n"
+        content += f"  Females: {females}\n\n"
+        content += f"Salvation Status:\n"
+        content += f"  Saved: {saved}\n"
+        content += f"  Unsaved: {unsaved}\n"
+        
+        # Marital status
+        marital_stats = Member.objects.filter(is_deleted=False).values('marital_status').annotate(count=Count('id')).order_by('-count')
+        content += "\nMarital Status Distribution:\n"
+        for stat in marital_stats:
+            content += f"  {stat['marital_status']}: {stat['count']}\n"
+    
+    elif export_type == 'geographical':
+        # Geographical Report
+        content += "GEOGRAPHICAL DISTRIBUTION REPORT\n"
+        content += "=" * 35 + "\n\n"
+        
+        # Countries
+        country_stats = Member.objects.filter(is_deleted=False).values('country').annotate(count=Count('id')).order_by('-count')
+        content += "Members by Country:\n"
+        for stat in country_stats:
+            content += f"  {stat['country']}: {stat['count']}\n"
+        content += "\n"
+        
+        # Tanzania Regions
+        tanzania_regions = Member.objects.filter(is_deleted=False, country='Tanzania').exclude(region__isnull=True).exclude(region='').values('region').annotate(count=Count('id')).order_by('-count')
+        content += "Members by Region (Tanzania):\n"
+        for stat in tanzania_regions:
+            content += f"  {stat['region']}: {stat['count']}\n"
+        content += "\n"
+        
+        # Dar es Salaam Areas
+        dar_areas = Member.objects.filter(is_deleted=False, country='Tanzania', region='Dar es Salaam').exclude(center_area__isnull=True).exclude(center_area='').values('center_area').annotate(count=Count('id')).order_by('-count')
+        content += "Members by Center/Area (Dar es Salaam):\n"
+        for stat in dar_areas:
+            content += f"  {stat['center_area']}: {stat['count']}\n"
     
     response.write(content.encode('utf-8'))
     return response
@@ -349,13 +424,102 @@ def export_analytics_excel(export_type, date_range):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename="analytics_{export_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
     
-    # For now, return CSV format
+    # Generate CSV content based on type
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Metric', 'Value'])
     
-    total_members = Member.objects.filter(is_deleted=False).count()
-    writer.writerow(['Total Members', total_members])
+    if export_type in ['summary', 'overview']:
+        writer.writerow(['Summary Report'])
+        writer.writerow(['Generated', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+        writer.writerow([])
+        
+        # Basic stats
+        total_members = Member.objects.filter(is_deleted=False).count()
+        males = Member.objects.filter(is_deleted=False, gender='male').count()
+        females = Member.objects.filter(is_deleted=False, gender='female').count()
+        saved = Member.objects.filter(is_deleted=False, saved=True).count()
+        unsaved = Member.objects.filter(is_deleted=False, saved=False).count()
+        
+        writer.writerow(['Metric', 'Count'])
+        writer.writerow(['Total Members Registered', total_members])
+        writer.writerow(['Number of Males', males])
+        writer.writerow(['Number of Females', females])
+        writer.writerow(['Number of Saved Members', saved])
+        writer.writerow(['Number of Unsaved Members', unsaved])
+        writer.writerow([])
+        
+        # Countries
+        writer.writerow(['Country', 'Member Count'])
+        country_stats = Member.objects.filter(is_deleted=False).values('country').annotate(count=Count('id')).order_by('-count')
+        for stat in country_stats:
+            writer.writerow([stat['country'], stat['count']])
+        writer.writerow([])
+        
+        # Tanzania Regions
+        writer.writerow(['Region (Tanzania)', 'Member Count'])
+        tanzania_regions = Member.objects.filter(is_deleted=False, country='Tanzania').exclude(region__isnull=True).exclude(region='').values('region').annotate(count=Count('id')).order_by('-count')
+        for stat in tanzania_regions:
+            writer.writerow([stat['region'], stat['count']])
+        writer.writerow([])
+        
+        # Dar es Salaam Areas
+        writer.writerow(['Center/Area (Dar es Salaam)', 'Member Count'])
+        dar_areas = Member.objects.filter(is_deleted=False, country='Tanzania', region='Dar es Salaam').exclude(center_area__isnull=True).exclude(center_area='').values('center_area').annotate(count=Count('id')).order_by('-count')
+        for stat in dar_areas:
+            writer.writerow([stat['center_area'], stat['count']])
+    
+    elif export_type == 'demographics':
+        writer.writerow(['Demographics Report'])
+        writer.writerow(['Generated', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+        writer.writerow([])
+        
+        total_members = Member.objects.filter(is_deleted=False).count()
+        males = Member.objects.filter(is_deleted=False, gender='male').count()
+        females = Member.objects.filter(is_deleted=False, gender='female').count()
+        saved = Member.objects.filter(is_deleted=False, saved=True).count()
+        unsaved = Member.objects.filter(is_deleted=False, saved=False).count()
+        
+        writer.writerow(['Total Members', total_members])
+        writer.writerow([])
+        writer.writerow(['Gender Distribution'])
+        writer.writerow(['Males', males])
+        writer.writerow(['Females', females])
+        writer.writerow([])
+        writer.writerow(['Salvation Status'])
+        writer.writerow(['Saved', saved])
+        writer.writerow(['Unsaved', unsaved])
+        writer.writerow([])
+        
+        # Marital status
+        writer.writerow(['Marital Status', 'Count'])
+        marital_stats = Member.objects.filter(is_deleted=False).values('marital_status').annotate(count=Count('id')).order_by('-count')
+        for stat in marital_stats:
+            writer.writerow([stat['marital_status'], stat['count']])
+    
+    elif export_type == 'geographical':
+        writer.writerow(['Geographical Distribution Report'])
+        writer.writerow(['Generated', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+        writer.writerow([])
+        
+        # Countries
+        writer.writerow(['Country', 'Member Count'])
+        country_stats = Member.objects.filter(is_deleted=False).values('country').annotate(count=Count('id')).order_by('-count')
+        for stat in country_stats:
+            writer.writerow([stat['country'], stat['count']])
+        writer.writerow([])
+        
+        # Tanzania Regions
+        writer.writerow(['Region (Tanzania)', 'Member Count'])
+        tanzania_regions = Member.objects.filter(is_deleted=False, country='Tanzania').exclude(region__isnull=True).exclude(region='').values('region').annotate(count=Count('id')).order_by('-count')
+        for stat in tanzania_regions:
+            writer.writerow([stat['region'], stat['count']])
+        writer.writerow([])
+        
+        # Dar es Salaam Areas
+        writer.writerow(['Center/Area (Dar es Salaam)', 'Member Count'])
+        dar_areas = Member.objects.filter(is_deleted=False, country='Tanzania', region='Dar es Salaam').exclude(center_area__isnull=True).exclude(center_area='').values('center_area').annotate(count=Count('id')).order_by('-count')
+        for stat in dar_areas:
+            writer.writerow([stat['center_area'], stat['count']])
     
     response.write(output.getvalue().encode('utf-8'))
     return response
