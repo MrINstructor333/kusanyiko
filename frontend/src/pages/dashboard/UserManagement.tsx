@@ -79,22 +79,25 @@ const UserManagement: React.FC = () => {
   }, []);
 
   const fetchUsers = async () => {
+    console.log('fetchUsers called');
     setLoading(true);
     try {
       const response = await userManagementAPI.getUsers();
+      console.log('API response:', response);
       setUsers(response.data);
+      console.log('Users set:', response.data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
       // For development, fall back to mock data if API fails
-      setUsers([
+      const mockUsers: User[] = [
         {
           id: 1,
           username: 'admin',
           email: 'admin@church.com',
           first_name: 'System',
           last_name: 'Administrator',
-          role: 'admin',
-          status: 'active',
+          role: 'admin' as const,
+          status: 'active' as const,
           date_joined: '2024-01-15T10:00:00Z',
           last_login: '2024-12-21T14:30:00Z',
           members_registered: 150,
@@ -107,15 +110,17 @@ const UserManagement: React.FC = () => {
           email: 'john@church.com',
           first_name: 'John',
           last_name: 'Smith',
-          role: 'registrant',
-          status: 'active',
+          role: 'registrant' as const,
+          status: 'active' as const,
           date_joined: '2024-02-20T09:15:00Z',
           last_login: '2024-12-20T16:45:00Z',
           members_registered: 85,
           is_staff: false,
           is_superuser: false,
         },
-      ]);
+      ];
+      setUsers(mockUsers);
+      console.log('Fallback to mock data:', mockUsers);
     } finally {
       setLoading(false);
     }
@@ -674,18 +679,19 @@ const UserManagement: React.FC = () => {
         )}
 
         {/* Debug Info - Remove this after fixing */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              Debug: Users loaded: {users.length}, Filtered: {filteredUsers.length}, Loading: {loading.toString()}
-            </p>
-          </div>
-        )}
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-700">
+            Debug: Users loaded: {users.length}, Filtered: {filteredUsers.length}, Loading: {loading.toString()}
+          </p>
+          <p className="text-sm text-blue-700">
+            Screen size check - Current width: <span className="md:hidden">Mobile</span><span className="hidden md:inline lg:hidden">Tablet</span><span className="hidden lg:inline">Desktop</span>
+          </p>
+        </div>
 
         {/* Users Table - Enhanced Mobile Responsive */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {/* Mobile Card View */}
-          <div className="block lg:hidden">
+          <div className="block md:hidden">
             <div className="space-y-4 p-4">
               {filteredUsers.map((user) => (
                 <div key={user.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -816,7 +822,7 @@ const UserManagement: React.FC = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-x-auto">
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -834,10 +840,10 @@ const UserManagement: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role & Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Activity
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Members Registered
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -897,7 +903,7 @@ const UserManagement: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                       <div className="flex items-center">
                         <ClockIcon className="h-4 w-4 mr-1" />
                         <div>
@@ -906,7 +912,7 @@ const UserManagement: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap hidden xl:table-cell">
+                    <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                       <div className="text-sm font-medium text-gray-900">
                         {user.members_registered}
                       </div>
@@ -924,7 +930,7 @@ const UserManagement: React.FC = () => {
                         
                         <button
                           onClick={() => handleViewActivity(user)}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-100 hidden lg:block"
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-100 hidden md:block"
                           title="View Activity"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -932,7 +938,7 @@ const UserManagement: React.FC = () => {
 
                         <button
                           onClick={() => handleResetPassword(user)}
-                          className="text-purple-600 hover:text-purple-900 p-1 rounded-full hover:bg-purple-100 hidden xl:block"
+                          className="text-purple-600 hover:text-purple-900 p-1 rounded-full hover:bg-purple-100 hidden lg:block"
                           title="Reset Password"
                           disabled={loading}
                         >
@@ -961,7 +967,7 @@ const UserManagement: React.FC = () => {
 
                         <button
                           onClick={() => handleStatusChange(user, 'suspended')}
-                          className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 hidden lg:block"
+                          className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 hidden md:block"
                           title="Suspend"
                         >
                           <ExclamationTriangleIcon className="h-4 w-4" />
