@@ -296,28 +296,45 @@ def export_members_pdf(queryset):
 @permission_classes([IsAuthenticated])
 def export_analytics(request):
     """Export analytics data"""
-    format_type = request.data.get('format', 'pdf')
-    export_type = request.data.get('type', 'overview')
-    date_range = request.data.get('date_range', {})
-    
-    if format_type == 'pdf':
-        response = export_analytics_pdf(export_type, date_range)
-    elif format_type == 'excel':
-        response = export_analytics_excel(export_type, date_range)
-    else:
-        return Response({'error': 'Unsupported format'}, status=400)
-    
-    # Log export activity
-    file_size = f"{len(response.content) / 1024:.1f} KB"
-    ExportHistory.objects.create(
-        export_type='analytics',
-        format=format_type,
-        created_by=request.user,
-        file_size=file_size,
-        filters_applied={'type': export_type, 'date_range': date_range}
-    )
-    
-    return response
+    try:
+        format_type = request.data.get('format', 'pdf')
+        export_type = request.data.get('type', 'overview')
+        date_range = request.data.get('date_range', {})
+        
+        print(f"Export analytics: format={format_type}, type={export_type}, date_range={date_range}")
+        
+        if format_type not in ['pdf', 'excel']:
+            return Response({'error': f'Unsupported format: {format_type}'}, status=400)
+        
+        if export_type not in ['overview', 'summary', 'demographics', 'geographical']:
+            return Response({'error': f'Unsupported export type: {export_type}'}, status=400)
+        
+        if format_type == 'pdf':
+            response = export_analytics_pdf(export_type, date_range)
+        elif format_type == 'excel':
+            response = export_analytics_excel(export_type, date_range)
+        
+        # Log export activity
+        try:
+            file_size = f"{len(response.content) / 1024:.1f} KB"
+            ExportHistory.objects.create(
+                export_type='analytics',
+                format=format_type,
+                created_by=request.user,
+                file_size=file_size,
+                filters_applied={'type': export_type, 'date_range': date_range}
+            )
+        except Exception as log_error:
+            print(f"Failed to log export: {log_error}")
+            # Don't fail the export if logging fails
+        
+        return response
+        
+    except Exception as e:
+        print(f"Export analytics error: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)
 
 
 def export_analytics_pdf(export_type, date_range):
