@@ -92,6 +92,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://172.24.143.233:3000',  # Current network IP 
     'https://172.24.143.233:3000',  # Current network IP HTTPS 
     'https://kusanyiko.efathamedia.com',  # Production subdomain
+    'https://kusanyiko-backend-g3je.onrender.com',  # Backend domain (for debugging)
 ]
 
 # Add frontend URL from environment for production
@@ -113,6 +114,18 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Allow all origins for debugging (remove in production)
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Security Settings
 SECURE_BROWSER_XSS_FILTER = True
