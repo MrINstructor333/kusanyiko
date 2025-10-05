@@ -183,7 +183,7 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'Quick Tools',
       description: 'Administrative utilities',
-      href: '/admin/tools',
+      href: '/admin/settings',
       icon: BoltIcon,
       color: 'from-indigo-500 to-indigo-600',
       hoverColor: 'hover:from-indigo-600 hover:to-indigo-700',
@@ -191,7 +191,7 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'System Reports',
       description: 'Generate comprehensive reports',
-      href: '/admin/reports',
+      href: '/admin/stats',
       icon: DocumentTextIcon,
       color: 'from-teal-500 to-teal-600',
       hoverColor: 'hover:from-teal-600 hover:to-teal-700',

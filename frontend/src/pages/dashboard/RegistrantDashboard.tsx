@@ -311,12 +311,12 @@ const RegistrantDashboard: React.FC = () => {
               ))}
             </div>
             <div className="mt-6">
-              <a
-                href="/registrant/members"
+              <Link
+                to="/registrant/members"
                 className="block w-full text-center py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 View All My Members →
-              </a>
+              </Link>
             </div>
           </div>
 
