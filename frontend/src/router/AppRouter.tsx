@@ -98,42 +98,152 @@ const AppRouter: React.FC = () => {
         
         <Route path="/admin/search-members" element={<SearchMembers />} />
         
+        {/* Redirects for backward compatibility */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/registrant" element={<Navigate to="/registrant/dashboard" replace />} />
+        
         {/* Protected Admin Routes */}
-        <Route path="/admin/*" element={
+        <Route path="/admin/dashboard" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <DashboardLayout>
-              <Routes>
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="stats" element={<AdminStatistics />} />
-                <Route path="members" element={<MyMembers />} />
-                <Route path="my-members" element={<MyMembers />} />
-                <Route path="members/add" element={<AddMember />} />
-                <Route path="members/:id" element={<MemberDetails />} />
-                <Route path="members/:id/edit" element={<EditMember />} />
-                <Route path="export" element={<ExportData />} />
-                <Route path="users" element={<UserManagement />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="profile-settings" element={<ProfileSettings />} />
-                <Route path="" element={<Navigate to="dashboard" replace />} />
-              </Routes>
+              <AdminDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/stats" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <AdminStatistics />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/members" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <MyMembers />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/my-members" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <MyMembers />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/members/add" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <AddMember />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/members/:id" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <MemberDetails />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/members/:id/edit" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <EditMember />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/export" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <ExportData />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/users" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <UserManagement />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/settings" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <Settings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/profile-settings" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardLayout>
+              <ProfileSettings />
             </DashboardLayout>
           </ProtectedRoute>
         } />
 
         {/* Protected Registrant Routes */}
-        <Route path="/registrant/*" element={
+        <Route path="/registrant/dashboard" element={
           <ProtectedRoute allowedRoles={['registrant']}>
             <DashboardLayout>
-              <Routes>
-                <Route path="dashboard" element={<RegistrantDashboard />} />
-                <Route path="stats" element={<MyStatistics />} />
-                <Route path="members" element={<MyMembers />} />
-                <Route path="members/add" element={<AddMember />} />
-                <Route path="members/:id" element={<MemberDetails />} />
-                <Route path="members/:id/edit" element={<EditMember />} />
-                <Route path="profile-settings" element={<ProfileSettings />} />
-                <Route path="" element={<Navigate to="dashboard" replace />} />
-              </Routes>
+              <RegistrantDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/stats" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <MyStatistics />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/members" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <MyMembers />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/members/add" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <AddMember />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/members/:id" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <MemberDetails />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/members/:id/edit" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <EditMember />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/registrant/profile-settings" element={
+          <ProtectedRoute allowedRoles={['registrant']}>
+            <DashboardLayout>
+              <ProfileSettings />
             </DashboardLayout>
           </ProtectedRoute>
         } />
