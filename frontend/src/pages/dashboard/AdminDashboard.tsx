@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { fetchAdminStats } from '../../store/slices/statsSlice';
 import { fetchMembers } from '../../store/slices/membersSlice';
@@ -181,17 +182,17 @@ const AdminDashboard: React.FC = () => {
       hoverColor: 'hover:from-orange-600 hover:to-orange-700',
     },
     {
-      title: 'Quick Tools',
-      description: 'Administrative utilities',
-      href: '/admin/settings',
+      title: 'User Management',
+      description: 'Manage system users',
+      href: '/admin/users',
       icon: BoltIcon,
       color: 'from-indigo-500 to-indigo-600',
       hoverColor: 'hover:from-indigo-600 hover:to-indigo-700',
     },
     {
-      title: 'System Reports',
-      description: 'Generate comprehensive reports',
-      href: '/admin/stats',
+      title: 'All Members',
+      description: 'View all registered members',
+      href: '/admin/members',
       icon: DocumentTextIcon,
       color: 'from-teal-500 to-teal-600',
       hoverColor: 'hover:from-teal-600 hover:to-teal-700',
@@ -404,9 +405,9 @@ const AdminDashboard: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {quickActions.map((action) => (
-                <a
+                <Link
                   key={action.title}
-                  href={action.href}
+                  to={action.href}
                   className="group p-5 border-2 border-gray-100 rounded-xl hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <div className="flex items-start space-x-4">
@@ -420,7 +421,7 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-gray-600 mt-1 text-sm">{action.description}</p>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -466,12 +467,12 @@ const AdminDashboard: React.FC = () => {
               ))}
             </div>
             <div className="mt-6">
-              <a
-                href="/admin/members"
+              <Link
+                to="/admin/members"
                 className="block w-full text-center py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 View All Members →
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -533,22 +534,22 @@ const AdminDashboard: React.FC = () => {
             <UsersIcon className="h-12 w-12 text-green-300 mx-auto mb-3" />
             <p className="text-lg font-medium">No members created yet</p>
             <p className="text-sm mt-1">Start adding members to see them here!</p>
-            <a
-              href="/admin/members/add"
+            <Link
+              to="/admin/members/add"
               className="inline-block mt-4 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200"
             >
               Add First Member
-            </a>
+            </Link>
           </div>
         )}
         
         <div className="mt-6">
-          <a
-            href="/admin/my-members"
+          <Link
+            to="/admin/my-members"
             className="block w-full text-center py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 hover:scale-105 shadow-lg"
           >
             View All My Members →
-          </a>
+          </Link>
         </div>
       </div>
 
