@@ -388,7 +388,7 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div className={`p-4 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg group-hover:scale-110 transition-transform duration-200`}>
-                <stat.icon className="h-6 w-6 text-white" strokeWidth={2} />
+                <stat.icon className="h-6 w-6 text-white" />
               </div>
             </div>
           </div>
@@ -412,7 +412,7 @@ const AdminDashboard: React.FC = () => {
                 >
                   <div className="flex items-start space-x-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${action.color} ${action.hoverColor} group-hover:scale-110 transition-all duration-200 shadow-lg`}>
-                      <action.icon className="h-6 w-6 text-white" strokeWidth={2} />
+                      <action.icon className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-200 text-lg">
