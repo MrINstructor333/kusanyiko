@@ -113,7 +113,6 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'Total Members',
       value: adminStats?.total_members || 0,
-      icon: UsersIcon,
       change: `+${calculateWeeklyGrowth()}% from last week`,
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
@@ -122,7 +121,6 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'New Today',
       value: calculateTodayRegistrations(),
-      icon: UserPlusIcon,
       change: 'Registration goal: 50/day',
       color: 'from-green-500 to-emerald-600',
       bgColor: 'bg-green-50',
@@ -131,7 +129,6 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'Countries',
       value: adminStats?.country_stats?.length || 0,
-      icon: GlobeAltIcon,
       change: 'Multi-national presence',
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
@@ -140,7 +137,6 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'Regions',
       value: adminStats?.region_stats?.length || 0,
-      icon: MapPinIcon,
       change: 'Geographic coverage',
       color: 'from-orange-500 to-orange-600',
       bgColor: 'bg-orange-50',
@@ -153,7 +149,6 @@ const AdminDashboard: React.FC = () => {
       title: 'Add New Member',
       description: 'Register a new church member',
       href: '/admin/members/add',
-      icon: UserPlusIcon,
       color: 'from-green-500 to-emerald-600',
       hoverColor: 'hover:from-green-600 hover:to-emerald-700',
     },
@@ -161,7 +156,6 @@ const AdminDashboard: React.FC = () => {
       title: 'My Members',
       description: 'View members I created',
       href: '/admin/my-members',
-      icon: UsersIcon,
       color: 'from-blue-500 to-blue-600',
       hoverColor: 'hover:from-blue-600 hover:to-blue-700',
     },
@@ -169,7 +163,6 @@ const AdminDashboard: React.FC = () => {
       title: 'Export Data',
       description: 'Download member database',
       href: '/admin/export',
-      icon: CloudArrowDownIcon,
       color: 'from-purple-500 to-purple-600',
       hoverColor: 'hover:from-purple-600 hover:to-purple-700',
     },
@@ -177,7 +170,6 @@ const AdminDashboard: React.FC = () => {
       title: 'View Analytics',
       description: 'Detailed statistics and reports',
       href: '/admin/stats',
-      icon: ChartBarIcon,
       color: 'from-orange-500 to-orange-600',
       hoverColor: 'hover:from-orange-600 hover:to-orange-700',
     },
@@ -185,7 +177,6 @@ const AdminDashboard: React.FC = () => {
       title: 'User Management',
       description: 'Manage system users',
       href: '/admin/users',
-      icon: UserGroupIcon,
       color: 'from-indigo-500 to-indigo-600',
       hoverColor: 'hover:from-indigo-600 hover:to-indigo-700',
     },
@@ -193,7 +184,6 @@ const AdminDashboard: React.FC = () => {
       title: 'All Members',
       description: 'View all registered members',
       href: '/admin/members',
-      icon: DocumentTextIcon,
       color: 'from-teal-500 to-teal-600',
       hoverColor: 'hover:from-teal-600 hover:to-teal-700',
     },
@@ -388,7 +378,10 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div className={`p-4 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg group-hover:scale-110 transition-transform duration-200`}>
-                <stat.icon className="h-6 w-6 text-white" />
+                {stat.title === 'Total Members' && <UsersIcon className="h-6 w-6 text-white" />}
+                {stat.title === 'New Today' && <UserPlusIcon className="h-6 w-6 text-white" />}
+                {stat.title === 'Countries' && <GlobeAltIcon className="h-6 w-6 text-white" />}
+                {stat.title === 'Regions' && <MapPinIcon className="h-6 w-6 text-white" />}
               </div>
             </div>
           </div>
@@ -412,7 +405,12 @@ const AdminDashboard: React.FC = () => {
                 >
                   <div className="flex items-start space-x-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${action.color} ${action.hoverColor} group-hover:scale-110 transition-all duration-200 shadow-lg`}>
-                      <action.icon className="h-6 w-6 text-white" />
+                      {action.title === 'Add New Member' && <UserPlusIcon className="h-6 w-6 text-white" />}
+                      {action.title === 'My Members' && <UsersIcon className="h-6 w-6 text-white" />}
+                      {action.title === 'Export Data' && <CloudArrowDownIcon className="h-6 w-6 text-white" />}
+                      {action.title === 'View Analytics' && <ChartBarIcon className="h-6 w-6 text-white" />}
+                      {action.title === 'User Management' && <UserGroupIcon className="h-6 w-6 text-white" />}
+                      {action.title === 'All Members' && <DocumentTextIcon className="h-6 w-6 text-white" />}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-200 text-lg">
