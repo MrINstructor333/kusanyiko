@@ -11,13 +11,11 @@ import {
   CalendarIcon,
   MapPinIcon,
   ArrowPathIcon,
-  ChartPieIcon,
   GlobeAltIcon,
   BuildingOfficeIcon,
   ClockIcon,
   TrophyIcon,
   SparklesIcon,
-  BoltIcon,
   CloudArrowDownIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
@@ -72,7 +70,7 @@ const AdminDashboard: React.FC = () => {
   const calculateTodayRegistrations = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     return members.filter(member => {
       if (!member.created_at) return false;
       const createdDate = new Date(member.created_at);
@@ -84,7 +82,7 @@ const AdminDashboard: React.FC = () => {
   const calculateWeeklyGrowth = () => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
+
     const weeklyCount = members.filter(member => {
       if (!member.created_at) return false;
       const createdDate = new Date(member.created_at);
@@ -211,25 +209,25 @@ const AdminDashboard: React.FC = () => {
       const memberCreatedBy = member.created_by;
       const currentUserId = user?.id;
       const currentUsername = user?.username;
-      
+
       // Check against user ID (number)
       if (typeof memberCreatedBy === 'number' && memberCreatedBy === currentUserId) {
         return true;
       }
-      
+
       // Check against username (string)
       if (typeof memberCreatedBy === 'string' && memberCreatedBy === currentUsername) {
         return true;
       }
-      
+
       // Additional check for registered_by field if created_by is not available
       if (!memberCreatedBy && member.registered_by === currentUserId) {
         return true;
       }
-      
+
       return false;
     });
-    
+
     return filteredMembers
       .filter(member => member.created_at)
       .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
@@ -269,25 +267,25 @@ const AdminDashboard: React.FC = () => {
       const memberCreatedBy = member.created_by;
       const currentUserId = user?.id;
       const currentUsername = user?.username;
-      
+
       // Check against user ID (number)
       if (typeof memberCreatedBy === 'number' && memberCreatedBy === currentUserId) {
         return true;
       }
-      
+
       // Check against username (string)
       if (typeof memberCreatedBy === 'string' && memberCreatedBy === currentUsername) {
         return true;
       }
-      
+
       // Additional check for registered_by field if created_by is not available
       if (!memberCreatedBy && member.registered_by === currentUserId) {
         return true;
       }
-      
+
       return false;
     });
-    
+
     return filteredMembers.length;
   };
 
@@ -335,7 +333,7 @@ const AdminDashboard: React.FC = () => {
                 Updated: {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             </div>
-            
+
             {/* Controls */}
             <div className="flex items-center space-x-2">
               <button
@@ -346,12 +344,12 @@ const AdminDashboard: React.FC = () => {
                 <ArrowPathIcon className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
               </button>
-              
+
               <button
                 onClick={() => setIsAutoRefresh(!isAutoRefresh)}
                 className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors duration-200 text-xs ${
-                  isAutoRefresh 
-                    ? 'bg-green-100 text-green-700 border border-green-200' 
+                  isAutoRefresh
+                    ? 'bg-green-100 text-green-700 border border-green-200'
                     : 'bg-gray-100 text-gray-700 border border-gray-200'
                 }`}
               >
@@ -449,7 +447,7 @@ const AdminDashboard: React.FC = () => {
                         }}
                       />
                     ) : null}
-                    <div 
+                    <div
                       className={`absolute inset-0 bg-white border-2 border-green-200 rounded-full flex items-center justify-center text-green-600 font-bold text-sm shadow-lg ring-4 ring-green-100 ${registration.profilePicture ? 'hidden' : 'flex'}`}
                     >
                       {registration.initials}
@@ -485,7 +483,7 @@ const AdminDashboard: React.FC = () => {
             ({myMembersTotal} total • {myMembers.length} recent)
           </span>
         </h2>
-        
+
         {myMembers.length > 0 ? (
           <div className="space-y-4">
             {myMembers.map((member, index) => (
@@ -504,7 +502,7 @@ const AdminDashboard: React.FC = () => {
                       }}
                     />
                   ) : null}
-                  <div 
+                  <div
                     className={`absolute inset-0 bg-white border-2 border-green-200 rounded-full flex items-center justify-center text-green-600 font-bold text-sm shadow-lg ring-4 ring-green-100 ${member.profilePicture ? 'hidden' : 'flex'}`}
                   >
                     {member.initials}
@@ -515,8 +513,8 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600">{member.region}</p>
                   <div className="flex items-center space-x-2 mt-1">
                     <div className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      member.saved 
-                        ? 'bg-green-100 text-green-800' 
+                      member.saved
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-orange-100 text-orange-800'
                     }`}>
                       {member.saved ? 'Saved' : 'Not Saved'}
@@ -540,7 +538,7 @@ const AdminDashboard: React.FC = () => {
             </Link>
           </div>
         )}
-        
+
         <div className="mt-6">
           <Link
             to="/admin/my-members"
