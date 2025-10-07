@@ -298,21 +298,29 @@ const AdminDashboard: React.FC = () => {
 
   // Chart data calculations
   const getDailyRegistrationsChart = () => {
+    console.log('Debug: Total members for daily chart:', members.length);
+    console.log('Debug: Sample members created_at:', members.slice(0, 3).map(m => ({ name: m.first_name, created_at: m.created_at })));
+
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dailyCounts = Array(7).fill(0);
     const now = new Date();
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay() + 1);
+    weekStart.setDate(now.getDate() - now.getDay() + 1); // Start of week (Monday)
+
+    console.log('Debug: Current week start:', weekStart.toDateString());
 
     members.forEach(member => {
       if (member.created_at) {
         const date = new Date(member.created_at);
         const dayDiff = Math.floor((date.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24));
+        console.log('Debug: Member', member.first_name, 'date:', date.toDateString(), 'dayDiff:', dayDiff);
         if (dayDiff >= 0 && dayDiff < 7) {
           dailyCounts[dayDiff]++;
         }
       }
     });
+
+    console.log('Debug: Daily counts:', dailyCounts);
 
     return {
       labels: days,
@@ -327,15 +335,21 @@ const AdminDashboard: React.FC = () => {
   };
 
   const getGenderDistributionChart = () => {
+    console.log('Debug: Total members for gender chart:', members.length);
+    console.log('Debug: Sample members gender data:', members.slice(0, 5).map(m => ({ name: m.first_name, gender: m.gender })));
+
     const genderCount = { Male: 0, Female: 0, Other: 0 };
     members.forEach(member => {
       const gender = member.gender || 'Other';
+      console.log('Debug: Processing member', member.first_name, 'gender:', gender);
       if (gender in genderCount) {
         genderCount[gender as keyof typeof genderCount]++;
       } else {
         genderCount.Other++;
       }
     });
+
+    console.log('Debug: Final gender counts:', genderCount);
 
     return {
       labels: Object.keys(genderCount),
@@ -350,15 +364,22 @@ const AdminDashboard: React.FC = () => {
   };
 
   const getTopRegionsChart = () => {
+    console.log('Debug: Total members for regions chart:', members.length);
+    console.log('Debug: Sample members regions:', members.slice(0, 5).map(m => ({ name: m.first_name, region: m.region })));
+
     const regionCount: { [key: string]: number } = {};
     members.forEach(member => {
       const region = member.region || 'Unknown';
       regionCount[region] = (regionCount[region] || 0) + 1;
     });
 
+    console.log('Debug: Region counts:', regionCount);
+
     const topRegions = Object.entries(regionCount)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5);
+
+    console.log('Debug: Top regions:', topRegions);
 
     return {
       labels: topRegions.map(([region]) => region),
