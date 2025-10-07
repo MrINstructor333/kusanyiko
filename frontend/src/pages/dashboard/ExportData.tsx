@@ -23,6 +23,7 @@ interface ExportOption {
   dataType: 'members' | 'analytics' | 'users' | 'financial';
   formats: string[];
   estimatedSize: string;
+  category: 'reports' | 'member-data' | 'analytics' | 'system';
 }
 
 const ExportData: React.FC = () => {
@@ -89,7 +90,8 @@ const ExportData: React.FC = () => {
       icon: ChartBarIcon,
       dataType: 'analytics',
       formats: ['excel', 'pdf'], // CSV not supported for analytics
-      estimatedSize: '0.5 MB'
+      estimatedSize: '0.5 MB',
+      category: 'reports'
     },
     {
       id: 'demographics-report',
@@ -98,7 +100,8 @@ const ExportData: React.FC = () => {
       icon: UsersIcon,
       dataType: 'analytics',
       formats: ['excel', 'pdf'], // CSV not supported for analytics
-      estimatedSize: '0.3 MB'
+      estimatedSize: '0.3 MB',
+      category: 'reports'
     },
     {
       id: 'geographical-report',
@@ -107,7 +110,8 @@ const ExportData: React.FC = () => {
       icon: ChartBarIcon,
       dataType: 'analytics',
       formats: ['excel', 'pdf'], // CSV not supported for analytics
-      estimatedSize: '0.4 MB'
+      estimatedSize: '0.4 MB',
+      category: 'reports'
     },
     {
       id: 'members-all',
@@ -116,7 +120,8 @@ const ExportData: React.FC = () => {
       icon: UsersIcon,
       dataType: 'members',
       formats: ['csv', 'excel', 'pdf'],
-      estimatedSize: `${Math.max(0.1, members.length * 0.015).toFixed(1)} MB`
+      estimatedSize: `${Math.max(0.1, members.length * 0.015).toFixed(1)} MB`,
+      category: 'member-data'
     },
     {
       id: 'members-my',
@@ -125,7 +130,8 @@ const ExportData: React.FC = () => {
       icon: UsersIcon,
       dataType: 'members',
       formats: ['csv', 'excel', 'pdf'],
-      estimatedSize: `${Math.max(0.1, myMembersCount * 0.015).toFixed(1)} MB`
+      estimatedSize: `${Math.max(0.1, myMembersCount * 0.015).toFixed(1)} MB`,
+      category: 'member-data'
     },
     {
       id: 'analytics-overview',
@@ -134,7 +140,8 @@ const ExportData: React.FC = () => {
       icon: ChartBarIcon,
       dataType: 'analytics',
       formats: ['pdf', 'excel'],
-      estimatedSize: `${Math.max(1.0, totalAnalyticsSize).toFixed(1)} MB`
+      estimatedSize: `${Math.max(1.0, totalAnalyticsSize).toFixed(1)} MB`,
+      category: 'analytics'
     },
     {
       id: 'analytics-monthly',
@@ -143,7 +150,8 @@ const ExportData: React.FC = () => {
       icon: CalendarIcon,
       dataType: 'analytics',
       formats: ['csv', 'excel', 'pdf'],
-      estimatedSize: `${Math.max(0.5, (adminStats?.recent_registrations || 0) * 0.01).toFixed(1)} MB`
+      estimatedSize: `${Math.max(0.5, (adminStats?.recent_registrations || 0) * 0.01).toFixed(1)} MB`,
+      category: 'analytics'
     },
     {
       id: 'user-activity',
@@ -152,7 +160,8 @@ const ExportData: React.FC = () => {
       icon: ClockIcon,
       dataType: 'users',
       formats: ['csv', 'excel'],
-      estimatedSize: '1.8 MB'
+      estimatedSize: '1.8 MB',
+      category: 'system'
     },
     {
       id: 'financial-summary',
@@ -161,7 +170,8 @@ const ExportData: React.FC = () => {
       icon: DocumentTextIcon,
       dataType: 'financial',
       formats: ['excel', 'pdf'],
-      estimatedSize: '4.2 MB'
+      estimatedSize: '4.2 MB',
+      category: 'system'
     }
   ];
 
@@ -298,7 +308,16 @@ const ExportData: React.FC = () => {
         a.href = url;
         
         // Get filename from response headers or generate one
-        let filename = `${option?.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.${selectedFormat}`;
+        const getFileExtension = (format: string) => {
+          switch (format) {
+            case 'excel': return 'xlsx';
+            case 'pdf': return 'pdf';
+            case 'csv': return 'csv';
+            default: return format;
+          }
+        };
+        
+        let filename = `${option?.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.${getFileExtension(selectedFormat)}`;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
           const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
@@ -360,6 +379,93 @@ const ExportData: React.FC = () => {
       default:
         return <DocumentTextIcon className="h-4 w-4" />;
     }
+  };
+
+  const supportsFormat = (option: ExportOption, format: string) => {
+    return option.formats.includes(format);
+  };
+
+  const renderExportOption = (option: ExportOption) => {
+    const status = exportStatus[option.id] || 'idle';
+    const progress = exportProgress[option.id] || 0;
+    const isSelected = selectedExports.includes(option.id);
+    const isSupported = supportsFormat(option, selectedFormat);
+
+    return (
+      <div key={option.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <option.icon className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-3">
+              <h3 className="font-semibold text-gray-900">{option.name}</h3>
+              <p className="text-sm text-gray-500">{option.estimatedSize}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {getStatusIcon(status)}
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => handleExportToggle(option.id)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+          </div>
+        </div>
+
+        <p className="text-gray-600 text-sm mb-4">{option.description}</p>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {option.formats.map((format) => (
+              <span
+                key={format}
+                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  format === selectedFormat && isSupported
+                    ? 'bg-green-100 text-green-800'
+                    : format === selectedFormat && !isSupported
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {getFormatIcon(format)}
+                <span className="ml-1 uppercase">{format}</span>
+              </span>
+            ))}
+          </div>
+
+          <button
+            onClick={() => simulateExport(option.id)}
+            disabled={!isSupported}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {status === 'exporting' ? 'Exporting...' : 'Export Now'}
+          </button>
+
+          {!isSupported && (
+            <p className="text-xs text-red-500 mt-2 text-center">
+              Not available in {selectedFormat.toUpperCase()} format
+            </p>
+          )}
+        </div>
+
+        {status === 'exporting' && (
+          <div className="mt-4">
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>Exporting...</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (membersLoading || statsLoading) {
@@ -463,96 +569,50 @@ const ExportData: React.FC = () => {
         </div>
 
         {/* Export Options */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exportOptions.map((option) => {
-            const isSelected = selectedExports.includes(option.id);
-            const status = exportStatus[option.id] || 'idle';
-            const progress = exportProgress[option.id] || 0;
-            const supportsFormat = option.formats.includes(selectedFormat);
+        <div className="space-y-8">
+          {/* Reports Category */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <DocumentTextIcon className="h-5 w-5 text-blue-500 mr-2" />
+              Summary Reports
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exportOptions.filter(option => option.category === 'reports').map((option) => renderExportOption(option))}
+            </div>
+          </div>
 
-            return (
-              <div
-                key={option.id}
-                className={`relative overflow-hidden bg-white rounded-2xl shadow-lg border transition-all duration-200 ${
-                  isSelected
-                    ? 'border-green-500 ring-2 ring-green-200'
-                    : 'border-gray-200 hover:border-green-300'
-                } ${!supportsFormat ? 'opacity-50' : ''}`}
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div className="h-12 w-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
-                        <option.icon className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div className="ml-4">
-                        <h3 className="text-lg font-semibold text-gray-900">{option.name}</h3>
-                        <p className="text-sm text-gray-500">{option.estimatedSize}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(status)}
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleExportToggle(option.id)}
-                        disabled={!supportsFormat}
-                        className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                      />
-                    </div>
-                  </div>
+          {/* Member Data Category */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <UsersIcon className="h-5 w-5 text-green-500 mr-2" />
+              Member Data
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exportOptions.filter(option => option.category === 'member-data').map((option) => renderExportOption(option))}
+            </div>
+          </div>
 
-                  <p className="text-gray-600 text-sm mb-4">{option.description}</p>
+          {/* Analytics Category */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <ChartBarIcon className="h-5 w-5 text-purple-500 mr-2" />
+              Analytics & Trends
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exportOptions.filter(option => option.category === 'analytics').map((option) => renderExportOption(option))}
+            </div>
+          </div>
 
-                  {/* Format Support */}
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span className="text-xs font-medium text-gray-500">Formats:</span>
-                    {option.formats.map((format) => (
-                      <span
-                        key={format}
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          format === selectedFormat
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {format.toUpperCase()}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Progress Bar */}
-                  {status === 'exporting' && (
-                    <div className="mb-4">
-                      <div className="bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-200"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Exporting... {progress}%</p>
-                    </div>
-                  )}
-
-                  {/* Individual Export Button */}
-                  <button
-                    onClick={() => simulateExport(option.id)}
-                    disabled={!supportsFormat || status === 'exporting'}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {status === 'exporting' ? 'Exporting...' : 'Export Now'}
-                  </button>
-
-                  {!supportsFormat && (
-                    <p className="text-xs text-red-500 mt-2 text-center">
-                      Not available in {selectedFormat.toUpperCase()} format
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {/* System Category */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <ClockIcon className="h-5 w-5 text-orange-500 mr-2" />
+              System & Activity Data
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exportOptions.filter(option => option.category === 'system').map((option) => renderExportOption(option))}
+            </div>
+          </div>
         </div>
 
         {/* Recent Exports */}
