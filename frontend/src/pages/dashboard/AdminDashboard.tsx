@@ -41,7 +41,7 @@ const AdminDashboard: React.FC = () => {
   const { members } = useAppSelector((state) => state.members);
   const { user } = useAppSelector((state) => state.auth);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAdminStats());

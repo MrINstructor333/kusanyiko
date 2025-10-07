@@ -35,7 +35,7 @@ const AdminStatistics: React.FC = () => {
   const { members } = useAppSelector((state) => state.members);
   const [timeFilter, setTimeFilter] = useState('all');
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
 
   useEffect(() => {
     // Initial fetch
