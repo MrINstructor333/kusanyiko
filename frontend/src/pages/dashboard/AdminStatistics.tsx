@@ -16,6 +16,18 @@ import {
   BuildingOfficeIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import { Bar, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const AdminStatistics: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -135,14 +147,55 @@ const AdminStatistics: React.FC = () => {
 
   const recentRegistrations = getRecentRegistrations();
 
-  const monthlyGrowth = [
-    { month: 'Jan', members: 120 },
-    { month: 'Feb', members: 145 },
-    { month: 'Mar', members: 180 },
-    { month: 'Apr', members: 210 },
-    { month: 'May', members: 250 },
-    { month: 'Jun', members: 290 },
+  // Monthly registrations from real data
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
+  const now = new Date();
+  const year = now.getFullYear();
+  const monthlyCounts = Array(12).fill(0);
+  members.forEach(member => {
+    if (member.created_at) {
+      const date = new Date(member.created_at);
+      if (date.getFullYear() === year) {
+        monthlyCounts[date.getMonth()]++;
+      }
+    }
+  });
+  const monthlyGrowth = months.map((month, i) => ({ month, members: monthlyCounts[i] }));
+  const monthlyBarData = {
+    labels: months,
+    datasets: [
+      {
+        label: 'Registrations',
+        data: monthlyCounts,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      },
+    ],
+  };
+  const topRegionsPieData = {
+    labels: topRegions.map(r => r.region),
+    datasets: [
+      {
+        label: 'Members',
+        data: topRegions.map(r => r.count),
+        backgroundColor: [
+          '#4ade80', '#60a5fa', '#f472b6', '#fbbf24', '#a78bfa'
+        ],
+      },
+    ],
+  };
+  const totalMembersBarData = {
+    labels: ['Total Members'],
+    datasets: [
+      {
+        label: 'Total',
+        data: [adminStats?.total_members || 0],
+        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+      },
+    ],
+  };
 
   const getTrendIcon = (trend: string) => {
     if (trend === 'up') return <ArrowUpIcon className="h-4 w-4 text-green-500" />;
@@ -435,6 +488,22 @@ const AdminStatistics: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* --- GRAPHS SECTION --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 my-8">
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-semibold mb-2">Monthly Registrations</h3>
+            <Bar data={monthlyBarData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-semibold mb-2">Top Regions</h3>
+            <Pie data={topRegionsPieData} options={{ responsive: true }} />
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-semibold mb-2">Total Members</h3>
+            <Bar data={totalMembersBarData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
           </div>
         </div>
       </div>

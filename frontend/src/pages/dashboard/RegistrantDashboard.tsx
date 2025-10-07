@@ -11,6 +11,21 @@ import {
   ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { Line, Bar, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
 const RegistrantDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -149,6 +164,85 @@ const RegistrantDashboard: React.FC = () => {
   ];
 
   const recentRegistrations = getRecentRegistrationsList();
+
+  // Chart data calculations
+  const getWeeklyChartData = () => {
+    const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    const weeklyCounts = Array(4).fill(0);
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    members.forEach(member => {
+      if (member.created_at) {
+        const date = new Date(member.created_at);
+        if (date.getMonth() === month && date.getFullYear() === year) {
+          const week = Math.floor(date.getDate() / 7);
+          if (week < 4) weeklyCounts[week]++;
+        }
+      }
+    });
+
+    return {
+      labels: weeks,
+      datasets: [{
+        label: 'Weekly Registrations',
+        data: weeklyCounts,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1,
+      }],
+    };
+  };
+
+  const getRegionChartData = () => {
+    const regionCount: { [key: string]: number } = {};
+    members.forEach(member => {
+      const region = member.region || 'Unknown';
+      regionCount[region] = (regionCount[region] || 0) + 1;
+    });
+
+    const topRegions = Object.entries(regionCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5);
+
+    return {
+      labels: topRegions.map(([region]) => region),
+      datasets: [{
+        label: 'Members by Region',
+        data: topRegions.map(([, count]) => count),
+        backgroundColor: [
+          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+        ],
+      }],
+    };
+  };
+
+  const getMonthlyProgressData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const monthlyCounts = Array(6).fill(0);
+    const now = new Date();
+    const year = now.getFullYear();
+
+    members.forEach(member => {
+      if (member.created_at) {
+        const date = new Date(member.created_at);
+        if (date.getFullYear() === year) {
+          const month = date.getMonth();
+          if (month < 6) monthlyCounts[month]++;
+        }
+      }
+    });
+
+    return {
+      labels: months,
+      datasets: [{
+        label: 'Monthly Registrations',
+        data: monthlyCounts,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      }],
+    };
+  };
 
   const campaignInfo = {
     startDate: 'October 6, 2025',
@@ -344,6 +438,31 @@ const RegistrantDashboard: React.FC = () => {
               </li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* --- GRAPHS SECTION --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Weekly Registrations
+          </h3>
+          <Line data={getWeeklyChartData()} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Members by Region
+          </h3>
+          <Pie data={getRegionChartData()} options={{ responsive: true }} />
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Monthly Progress
+          </h3>
+          <Bar data={getMonthlyProgressData()} options={{ responsive: true, plugins: { legend: { display: false } } }} />
         </div>
       </div>
     </div>

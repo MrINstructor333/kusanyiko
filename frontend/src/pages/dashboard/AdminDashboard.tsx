@@ -19,6 +19,21 @@ import {
   CloudArrowDownIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import { Line, Bar, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -280,6 +295,80 @@ const AdminDashboard: React.FC = () => {
   const recentRegistrations = getRecentRegistrations();
   const myMembers = getMyMembers();
   const myMembersTotal = getMyMembersTotal();
+
+  // Chart data calculations
+  const getDailyRegistrationsChart = () => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dailyCounts = Array(7).fill(0);
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay() + 1);
+
+    members.forEach(member => {
+      if (member.created_at) {
+        const date = new Date(member.created_at);
+        const dayDiff = Math.floor((date.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24));
+        if (dayDiff >= 0 && dayDiff < 7) {
+          dailyCounts[dayDiff]++;
+        }
+      }
+    });
+
+    return {
+      labels: days,
+      datasets: [{
+        label: 'Daily Registrations',
+        data: dailyCounts,
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+        tension: 0.4,
+      }],
+    };
+  };
+
+  const getGenderDistributionChart = () => {
+    const genderCount = { Male: 0, Female: 0, Other: 0 };
+    members.forEach(member => {
+      const gender = member.gender || 'Other';
+      if (gender in genderCount) {
+        genderCount[gender as keyof typeof genderCount]++;
+      } else {
+        genderCount.Other++;
+      }
+    });
+
+    return {
+      labels: Object.keys(genderCount),
+      datasets: [{
+        label: 'Members by Gender',
+        data: Object.values(genderCount),
+        backgroundColor: [
+          '#3B82F6', '#EC4899', '#F59E0B'
+        ],
+      }],
+    };
+  };
+
+  const getTopRegionsChart = () => {
+    const regionCount: { [key: string]: number } = {};
+    members.forEach(member => {
+      const region = member.region || 'Unknown';
+      regionCount[region] = (regionCount[region] || 0) + 1;
+    });
+
+    const topRegions = Object.entries(regionCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5);
+
+    return {
+      labels: topRegions.map(([region]) => region),
+      datasets: [{
+        label: 'Members',
+        data: topRegions.map(([, count]) => count),
+        backgroundColor: 'rgba(139, 92, 246, 0.6)',
+      }],
+    };
+  };
 
   if (loading) {
     return (
@@ -555,6 +644,31 @@ const AdminDashboard: React.FC = () => {
               Loading geographic data...
             </div>
           )}
+        </div>
+      </div>
+
+      {/* --- GRAPHS SECTION --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Daily Registrations
+          </h3>
+          <Line data={getDailyRegistrationsChart()} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Gender Distribution
+          </h3>
+          <Pie data={getGenderDistributionChart()} options={{ responsive: true }} />
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></span>
+            Top Regions
+          </h3>
+          <Bar data={getTopRegionsChart()} options={{ responsive: true, plugins: { legend: { display: false } } }} />
         </div>
       </div>
     </div>

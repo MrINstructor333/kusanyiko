@@ -14,6 +14,21 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from '@heroicons/react/24/outline';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from 'recharts';
 
 const MyStatistics: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -168,6 +183,61 @@ const MyStatistics: React.FC = () => {
     }
     
     return weeklyData;
+  };
+
+  // Chart data preparation functions
+  const getGenderChartData = () => {
+    const genderCount: { [key: string]: number } = {};
+    members.forEach(member => {
+      if (member.gender) {
+        genderCount[member.gender] = (genderCount[member.gender] || 0) + 1;
+      }
+    });
+
+    return Object.entries(genderCount).map(([gender, count]) => ({
+      name: gender === 'male' ? 'Male' : 'Female',
+      value: count,
+      fill: gender === 'male' ? '#3B82F6' : '#EC4899'
+    }));
+  };
+
+  const getRegionChartData = () => {
+    const regionCount: { [key: string]: number } = {};
+    members.forEach(member => {
+      if (member.region) {
+        regionCount[member.region] = (regionCount[member.region] || 0) + 1;
+      }
+    });
+
+    return Object.entries(regionCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 8)
+      .map(([region, count]) => ({
+        region,
+        members: count
+      }));
+  };
+
+  const getWeeklyChartData = () => {
+    return getWeeklyData();
+  };
+
+  const getPerformanceData = () => {
+    const dayCount: { [key: string]: number } = {};
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    members.forEach(member => {
+      if (member.created_at) {
+        const day = new Date(member.created_at).getDay();
+        const dayName = dayNames[day];
+        dayCount[dayName] = (dayCount[dayName] || 0) + 1;
+      }
+    });
+
+    return Object.entries(dayCount).map(([day, count]) => ({
+      day: day.substring(0, 3), // Short day name
+      registrations: count
+    }));
   };
 
   // Real-time statistics data
