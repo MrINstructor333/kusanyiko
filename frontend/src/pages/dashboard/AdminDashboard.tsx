@@ -195,7 +195,7 @@ const AdminDashboard: React.FC = () => {
       .map(member => ({
         name: `${member.first_name} ${member.last_name}`,
         region: member.region || 'Unknown',
-        registrant: 'System User', // You might want to fetch this from member.registered_by
+        registrant: member.registered_by ? `User ${member.registered_by}` : 'System',
         time: formatTimeAgo(member.created_at!),
         profilePicture: typeof member.picture === 'string' ? member.picture : member.picture ? URL.createObjectURL(member.picture) : null,
         initials: `${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`,
