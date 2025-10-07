@@ -40,34 +40,7 @@ def health_check(request):
         'timestamp': '2025-01-22T10:00:00Z'
     })
 
-@csrf_exempt
-@require_http_methods(["GET", "OPTIONS"])
-def api_root(request):
-    """API root endpoint"""
-    if request.method == 'OPTIONS':
-        # Handle CORS preflight request
-        response = JsonResponse({'message': 'Kusanyiko API'})
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-    
-    return JsonResponse({
-        'message': 'Welcome to Kusanyiko API',
-        'version': '1.0',
-        'endpoints': {
-            'auth': '/api/auth/',
-            'users': '/api/users/',
-            'members': '/api/members/',
-            'stats': '/api/stats/',
-            'health': '/api/health/',
-            'admin': '/admin/'
-        },
-        'docs': 'API documentation available at /api/docs/'
-    })
-
 urlpatterns = [
-    path('', api_root, name='api_root'),  # Root API endpoint
     path('admin/', admin.site.urls),
     path('api/health/', health_check, name='health_check'),  # Health check endpoint
     path('api/auth/', include('users.urls')),

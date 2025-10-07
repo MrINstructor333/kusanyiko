@@ -188,18 +188,33 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const getRecentRegistrations = () => {
-    return members
+    console.log('Total members:', members.length);
+    console.log('Members with created_at:', members.filter(member => member.created_at).length);
+    console.log('Sample members:', members.slice(0, 2).map(m => ({
+      name: `${m.first_name} ${m.last_name}`,
+      created_at: m.created_at,
+      registered_by: m.registered_by
+    })));
+
+    const filtered = members
       .filter(member => member.created_at)
       .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
-      .slice(0, 3)
-      .map(member => ({
-        name: `${member.first_name} ${member.last_name}`,
-        region: member.region || 'Unknown',
-        registrant: member.registered_by ? `User ${member.registered_by}` : 'System',
-        time: formatTimeAgo(member.created_at!),
-        profilePicture: typeof member.picture === 'string' ? member.picture : member.picture ? URL.createObjectURL(member.picture) : null,
-        initials: `${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`,
-      }));
+      .slice(0, 3);
+
+    console.log('Recent registrations:', filtered.map(m => ({
+      name: `${m.first_name} ${m.last_name}`,
+      created_at: m.created_at,
+      time: formatTimeAgo(m.created_at!)
+    })));
+
+    return filtered.map(member => ({
+      name: `${member.first_name} ${member.last_name}`,
+      region: member.region || 'Unknown',
+      registrant: member.registered_by ? `User ${member.registered_by}` : 'System',
+      time: formatTimeAgo(member.created_at!),
+      profilePicture: typeof member.picture === 'string' ? member.picture : member.picture ? URL.createObjectURL(member.picture) : null,
+      initials: `${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`,
+    }));
   };
 
   const getMyMembers = () => {
