@@ -298,39 +298,58 @@ const AdminDashboard: React.FC = () => {
 
   // Chart data calculations
   const getDailyRegistrationsChart = () => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // Get the last 7 days (including today)
+    const last7Days: Date[] = [];
     const dailyCounts = Array(7).fill(0);
-    const now = new Date();
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay() + 1); // Start of week (Monday)
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      // Set to start of day for consistent comparison
+      date.setHours(0, 0, 0, 0);
+      last7Days.push(date);
+    }
 
     members.forEach(member => {
       if (member.created_at) {
         try {
-          const date = new Date(member.created_at);
-          if (isNaN(date.getTime())) {
-            return;
+          const memberDate = new Date(member.created_at);
+          if (isNaN(memberDate.getTime())) {
+            return; // Skip invalid dates
           }
 
-          const dayDiff = Math.floor((date.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24));
+          // Set member date to start of day for comparison
+          memberDate.setHours(0, 0, 0, 0);
 
-          if (dayDiff >= 0 && dayDiff < 7) {
-            dailyCounts[dayDiff]++;
+          // Find which day this member was created
+          const dayIndex = last7Days.findIndex(day =>
+            day.getTime() === memberDate.getTime()
+          );
+
+          if (dayIndex !== -1) {
+            dailyCounts[dayIndex]++;
           }
         } catch (error) {
-          // Skip invalid dates
+          // Skip members with invalid date formats
         }
       }
     });
 
     return {
-      labels: days,
+      labels: last7Days.map(date => {
+        const options: Intl.DateTimeFormatOptions = {
+          month: 'short',
+          day: 'numeric'
+        };
+        return date.toLocaleDateString('en-US', options);
+      }),
       datasets: [{
         label: 'Daily Registrations',
         data: dailyCounts,
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.2)',
         tension: 0.4,
+        fill: true,
       }],
     };
   };
