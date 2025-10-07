@@ -42,6 +42,7 @@ const AdminDashboard: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isAutoRefresh, setIsAutoRefresh] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     dispatch(fetchAdminStats());
@@ -51,16 +52,25 @@ const AdminDashboard: React.FC = () => {
 
   // Auto-refresh data every 30 seconds if enabled
   useEffect(() => {
-    if (!isAutoRefresh) return;
+    if (isAutoRefresh && !refreshInterval) {
+      const interval = setInterval(() => {
+        dispatch(fetchAdminStats());
+        dispatch(fetchMembers({}));
+        setLastUpdated(new Date());
+      }, 30000); // 30 seconds
+      setRefreshInterval(interval);
+    } else if (!isAutoRefresh && refreshInterval) {
+      clearInterval(refreshInterval);
+      setRefreshInterval(null);
+    }
 
-    const interval = setInterval(() => {
-      dispatch(fetchAdminStats());
-      dispatch(fetchMembers({}));
-      setLastUpdated(new Date());
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [dispatch, isAutoRefresh]);
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        setRefreshInterval(null);
+      }
+    };
+  }, [dispatch, isAutoRefresh, refreshInterval]);
 
   const handleManualRefresh = () => {
     dispatch(fetchAdminStats());
