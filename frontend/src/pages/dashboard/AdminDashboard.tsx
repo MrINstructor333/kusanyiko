@@ -23,31 +23,16 @@ import {
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { adminStats, loading } = useAppSelector((state) => state.stats);
-  const { members, loading: membersLoading, error: membersError } = useAppSelector((state) => state.members);
+  const { members } = useAppSelector((state) => state.members);
   const { user } = useAppSelector((state) => state.auth);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
 
   useEffect(() => {
-    console.log('AdminDashboard: Dispatching fetchAdminStats and fetchMembers');
     dispatch(fetchAdminStats());
     dispatch(fetchMembers({}));
     setLastUpdated(new Date());
   }, [dispatch]);
-
-  // Debug: Log user and members data when they change
-  useEffect(() => {
-    console.log('User state:', user ? { id: user.id, username: user.username, role: user.role } : 'No user');
-    if (user && members.length > 0) {
-      console.log('Current user:', { id: user.id, username: user.username });
-      console.log('Sample members with created_by:', members.slice(0, 3).map(m => ({
-        name: `${m.first_name} ${m.last_name}`,
-        created_by: m.created_by,
-        registered_by: m.registered_by
-      })));
-      console.log('My members count:', getMyMembersTotal());
-    }
-  }, [user, members]);
 
   // Auto-refresh data every 30 seconds if enabled
   useEffect(() => {
@@ -190,26 +175,10 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const getRecentRegistrations = () => {
-    console.log('Total members:', members.length);
-    console.log('Members loading:', membersLoading);
-    console.log('Members error:', membersError);
-    console.log('Members with created_at:', members.filter(member => member.created_at).length);
-    console.log('Sample members:', members.slice(0, 2).map(m => ({
-      name: `${m.first_name} ${m.last_name}`,
-      created_at: m.created_at,
-      registered_by: m.registered_by
-    })));
-
     const filtered = members
       .filter(member => member.created_at)
       .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
       .slice(0, 3);
-
-    console.log('Recent registrations:', filtered.map(m => ({
-      name: `${m.first_name} ${m.last_name}`,
-      created_at: m.created_at,
-      time: formatTimeAgo(m.created_at!)
-    })));
 
     return filtered.map(member => ({
       name: `${member.first_name} ${member.last_name}`,
