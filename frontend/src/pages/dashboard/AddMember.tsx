@@ -102,11 +102,7 @@ const schema = yup.object({
   saved: yup.boolean().required('Please indicate salvation status'),
   church_registration_number: yup.string().optional(),
   country: yup.string().required('Country is required'),
-  region: yup.string().when('country', {
-    is: 'Tanzania',
-    then: (schema) => schema.required('Region is required when Tanzania is selected'),
-    otherwise: (schema) => schema.optional()
-  }),
+  region: yup.string().required('Region is required'),
   center_area: yup.string().optional(),
   zone: yup.string().required('Zone is required'),
   cell: yup.string().required('Cell is required'),
@@ -187,22 +183,31 @@ const AddMember: React.FC = () => {
 
   const onSubmit = async (data: MemberFormData) => {
     try {
+      // Process region based on country and center_area selection
+      let processedData = { ...data };
+
+      if (data.country === 'Tanzania') {
+        // For Tanzania, if center_area is selected, use it as region
+        if (data.center_area && data.center_area.trim() !== '') {
+          processedData.region = data.center_area;
+        }
+        // Otherwise keep the selected region
+      } else {
+        // For non-Tanzania countries, use the country name as region
+        processedData.region = data.country;
+      }
+
       // Create FormData to handle file upload
       const formData = new FormData();
-      
+
       // Add all form fields to FormData with proper type handling
-      Object.entries(data).forEach(([key, value]) => {
+      Object.entries(processedData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           // Skip empty church_registration_number since it's optional
           if (key === 'church_registration_number' && value === '') {
             return;
           }
-          
-          // Skip empty region when country is not Tanzania
-          if (key === 'region' && value === '' && data.country !== 'Tanzania') {
-            return;
-          }
-          
+
           // Handle boolean values
           if (typeof value === 'boolean') {
             formData.append(key, value.toString());
@@ -218,24 +223,20 @@ const AddMember: React.FC = () => {
             if (optionalFields.includes(key) && value.trim() === '') {
               return;
             }
-            // For region field, skip if empty and country is not Tanzania
-            if (key === 'region' && value.trim() === '' && data.country !== 'Tanzania') {
-              return;
-            }
             formData.append(key, value);
           }
           // Handle all other values
           else {
-            formData.append(key, value.toString());
+            formData.append(key, String(value));
           }
         }
       });
-      
+
       // Add the profile picture file if uploaded
       if (profileFile) {
         formData.append('picture', profileFile);
       }
-      
+
       await dispatch(createMember(formData)).unwrap();
       setIsSubmitted(true);
       // Navigate back after 3 seconds
@@ -245,17 +246,17 @@ const AddMember: React.FC = () => {
       }, 3000);
     } catch (error: any) {
       console.error('Error creating member:', error);
-      
+
       // Log more detailed error information
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
       }
-      
+
       // Display user-friendly error message
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.message || 
+      const errorMessage = error.response?.data?.message ||
+                          error.response?.data?.error ||
+                          error.message ||
                           'Failed to create member';
       console.error('Detailed error:', errorMessage);
     }
@@ -270,12 +271,7 @@ const AddMember: React.FC = () => {
         fieldsToValidate = ['first_name', 'last_name', 'gender', 'age', 'marital_status'];
         break;
       case 2: // Contact & Location
-        fieldsToValidate = ['mobile_no', 'country', 'residence', 'zone', 'cell'];
-        // Add region only if Tanzania is selected
-        const currentCountry = watch('country');
-        if (currentCountry === 'Tanzania') {
-          fieldsToValidate.push('region');
-        }
+        fieldsToValidate = ['mobile_no', 'country', 'region', 'residence', 'zone', 'cell'];
         break;
       case 3: // Church Information
         fieldsToValidate = ['saved', 'origin', 'attending_date'];
@@ -727,12 +723,12 @@ const AddMember: React.FC = () => {
                     </select>
                   </div>
 
-                  {/* Region - Only show when Tanzania is selected */}
-                  {watchedCountry === 'Tanzania' && (
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Region *
-                      </label>
+                  {/* Region - Show for all countries */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Region {watchedCountry === 'Tanzania' ? '*' : '(Auto-filled)'}
+                    </label>
+                    {watchedCountry === 'Tanzania' ? (
                       <select
                         {...register('region')}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
@@ -744,12 +740,20 @@ const AddMember: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      {errors.region && (
-                        <p className="text-red-500 text-sm mt-1">{errors.region.message}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={watchedCountry || ''}
+                        readOnly
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed"
+                        placeholder="Region will be set to country name"
+                      />
+                    )}
+                    {errors.region && watchedCountry === 'Tanzania' && (
+                      <p className="text-red-500 text-sm mt-1">{errors.region.message}</p>
+                    )}
+                  </div>
+                  </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Center/Area */}
