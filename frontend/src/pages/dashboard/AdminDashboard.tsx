@@ -23,12 +23,13 @@ import {
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { adminStats, loading } = useAppSelector((state) => state.stats);
-  const { members } = useAppSelector((state) => state.members);
+  const { members, loading: membersLoading, error: membersError } = useAppSelector((state) => state.members);
   const { user } = useAppSelector((state) => state.auth);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
 
   useEffect(() => {
+    console.log('AdminDashboard: Dispatching fetchAdminStats and fetchMembers');
     dispatch(fetchAdminStats());
     dispatch(fetchMembers({}));
     setLastUpdated(new Date());
@@ -36,6 +37,7 @@ const AdminDashboard: React.FC = () => {
 
   // Debug: Log user and members data when they change
   useEffect(() => {
+    console.log('User state:', user ? { id: user.id, username: user.username, role: user.role } : 'No user');
     if (user && members.length > 0) {
       console.log('Current user:', { id: user.id, username: user.username });
       console.log('Sample members with created_by:', members.slice(0, 3).map(m => ({
@@ -189,6 +191,8 @@ const AdminDashboard: React.FC = () => {
 
   const getRecentRegistrations = () => {
     console.log('Total members:', members.length);
+    console.log('Members loading:', membersLoading);
+    console.log('Members error:', membersError);
     console.log('Members with created_at:', members.filter(member => member.created_at).length);
     console.log('Sample members:', members.slice(0, 2).map(m => ({
       name: `${m.first_name} ${m.last_name}`,
