@@ -99,36 +99,41 @@ const AdminStatistics: React.FC = () => {
     { region: 'Mbeya', count: 19 },
   ];
 
-  const recentRegistrations = [
-    {
-      name: 'John Doe',
-      region: 'Dar es Salaam',
-      registrant: 'Maria Johnson',
-      time: '30 minutes ago',
-      status: 'approved',
-    },
-    {
-      name: 'Sarah Smith',
-      region: 'Mwanza',
-      registrant: 'Peter Wilson',
-      time: '1 hour ago',
-      status: 'pending',
-    },
-    {
-      name: 'Michael Brown',
-      region: 'Arusha',
-      registrant: 'Grace Mwamba',
-      time: '2 hours ago',
-      status: 'approved',
-    },
-    {
-      name: 'Emily Davis',
-      region: 'Dodoma',
-      registrant: 'David Shao',
-      time: '3 hours ago',
-      status: 'approved',
-    },
-  ];
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Just now';
+    }
+  };
+
+  const getRecentRegistrations = () => {
+    const filtered = members
+      .filter(member => member.created_at)
+      .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
+      .slice(0, 4);
+
+    return filtered.map(member => ({
+      name: `${member.first_name} ${member.last_name}`,
+      region: member.region || 'Unknown',
+      registrant: member.registered_by ? `User ${member.registered_by}` : 'System',
+      time: formatTimeAgo(member.created_at!),
+      status: 'approved', // Default status for now
+    }));
+  };
+
+  const recentRegistrations = getRecentRegistrations();
 
   const monthlyGrowth = [
     { month: 'Jan', members: 120 },
