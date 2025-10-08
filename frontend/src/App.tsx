@@ -5,6 +5,7 @@ import { store } from './store';
 import { useAppDispatch } from './hooks/redux';
 import { initializeAuth } from './store/slices/authSlice';
 import AppRouter from './router/AppRouter';
+import ErrorBoundary from './components/ErrorBoundary';
 import { initializeConsoleOverrides } from './utils/consoleOverrides';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -26,23 +27,25 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) 
 function App() {
   return (
     <Provider store={store}>
-      <div className="App">
-        <AuthInitializer>
-          <AppRouter />
-        </AuthInitializer>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </div>
+      <ErrorBoundary>
+        <div className="App">
+          <AuthInitializer>
+            <AppRouter />
+          </AuthInitializer>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </div>
+      </ErrorBoundary>
     </Provider>
   );
 }

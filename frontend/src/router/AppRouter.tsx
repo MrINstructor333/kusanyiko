@@ -36,11 +36,28 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
+  // Check if user is authenticated
   if (!isAuthenticated) {
+    // Clear any stale data
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  // Check if user object exists
+  if (!user) {
+    // Clear authentication data if user is missing
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check role-based access
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to appropriate dashboard based on role
     const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/registrant/dashboard';
     return <Navigate to={redirectPath} replace />;

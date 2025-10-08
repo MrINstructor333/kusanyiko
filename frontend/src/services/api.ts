@@ -86,13 +86,50 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle authentication errors (401 Unauthorized)
     if (error.response?.status === 401) {
+      // Clear all authentication data
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      
+      // Redirect to login page
+      window.location.href = '#/login';
+      return Promise.reject(error);
     }
-    // Remove the console.error to avoid showing API errors in console
+    
+    // Handle forbidden access (403 Forbidden)
+    if (error.response?.status === 403) {
+      // Clear authentication data and redirect to login
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      
+      window.location.href = '#/login';
+      return Promise.reject(error);
+    }
+    
+    // Handle not found errors (404) - check if it's an auth-related 404
+    if (error.response?.status === 404) {
+      const isAuthEndpoint = error.config?.url?.includes('/auth/') || 
+                             error.config?.url?.includes('/profile/');
+      
+      if (isAuthEndpoint) {
+        // Session might be invalid, clear and redirect
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        
+        window.location.href = '#/login';
+        return Promise.reject(error);
+      }
+    }
+    
+    // Handle network errors or server unavailable
+    if (!error.response) {
+      console.warn('Network error - server might be unavailable');
+    }
+    
     return Promise.reject(error);
   }
 );
